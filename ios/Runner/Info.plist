@@ -9,6 +9,8 @@
 		<string>mailto</string>
 		<string>whatsapp</string>
 	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Image select karke car or showroom photos add karne ke liye phoito library access chahiye.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>

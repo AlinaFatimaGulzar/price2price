@@ -312,7 +312,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: isAlert ? Colors.red.shade50 : null,
+      color: isAlert ? const Color(0x1FFF8A80) : null,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -331,13 +331,16 @@ class _StatCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(icon, color: isAlert ? Colors.red : AppColors.accent),
+                Icon(
+                  icon,
+                  color: isAlert ? AppColors.danger : AppColors.accent,
+                ),
               ],
             ),
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: isAlert ? Colors.red : null,
+                color: isAlert ? AppColors.danger : null,
               ),
             ),
           ],

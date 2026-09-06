@@ -143,13 +143,14 @@ class _ReviewTile extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.sage.withValues(alpha: 0.6),
+                    color: const Color(0x0FFFFFFF),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: const Icon(
                     Icons.person,
                     size: 18,
-                    color: AppColors.ink,
+                    color: AppColors.accent,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -166,15 +167,18 @@ class _ReviewTile extends StatelessWidget {
                       vertical: 4,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFF4E0),
+                      color: AppColors.accent.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.45),
+                      ),
                     ),
                     child: const Text(
                       'PENDING APPROVAL',
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w800,
-                        color: Color(0xFFB26A00),
+                        color: AppColors.accent,
                       ),
                     ),
                   )
@@ -192,7 +196,7 @@ class _ReviewTile extends StatelessWidget {
                   Icon(
                     i < review.rating ? Icons.star : Icons.star_border,
                     size: 18,
-                    color: Colors.amber,
+                    color: AppColors.accent,
                   ),
                 const SizedBox(width: 10),
                 Text(
@@ -283,20 +287,36 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
         top: 20,
         bottom: MediaQuery.of(context).viewInsets.bottom + 20,
       ),
-      child: Material(
-        color: AppColors.paper,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF0E1D24),
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+          border: Border.all(color: AppColors.border),
+        ),
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                widget.initial == null
-                    ? 'Rate this showroom'
-                    : 'Edit your review',
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                children: [
+                  Container(
+                    width: 4,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    widget.initial == null
+                        ? 'Rate this showroom'
+                        : 'Edit your review',
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
@@ -315,7 +335,9 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
                             ? Icons.star_rounded
                             : Icons.star_outline_rounded,
                         size: 38,
-                        color: i <= _rating ? Colors.amber : AppColors.mutedInk,
+                        color: i <= _rating
+                            ? AppColors.accent
+                            : AppColors.mutedInk,
                       ),
                     ),
                 ],
@@ -333,7 +355,7 @@ class _WriteReviewSheetState extends State<_WriteReviewSheet> {
               ),
               if (_error.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Text(_error, style: const TextStyle(color: Colors.red)),
+                Text(_error, style: const TextStyle(color: AppColors.danger)),
               ],
               const SizedBox(height: 12),
               SizedBox(

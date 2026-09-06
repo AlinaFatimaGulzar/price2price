@@ -1,4 +1,11 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../app/theme/app_theme.dart';
+import '../../../core/storage/image_storage_repository.dart';
+import '../../../core/widgets/image_picker_field.dart';
 
 import '../../showrooms/domain/showroom.dart';
 import '../data/supabase_admin_car_repository.dart';
@@ -6,10 +13,11 @@ import '../domain/admin_car_repository.dart';
 import '../domain/car.dart';
 
 class CarFormPage extends StatefulWidget {
-  const CarFormPage({super.key, this.car, this.repository});
+  const CarFormPage({super.key, this.car, this.repository, this.imageStorage});
 
   final Car? car;
   final AdminCarRepository? repository;
+  final ImageStorageRepository? imageStorage;
 
   @override
   State<CarFormPage> createState() => _CarFormPageState();
@@ -19,6 +27,8 @@ class _CarFormPageState extends State<CarFormPage> {
   final _formKey = GlobalKey<FormState>();
   late final AdminCarRepository _repository =
       widget.repository ?? const SupabaseAdminCarRepository();
+  late final ImageStorageRepository _imageStorage =
+      widget.imageStorage ?? const SupabaseImageStorageRepository();
 
   late final TextEditingController _titleController;
   late final TextEditingController _brandController;
@@ -35,6 +45,10 @@ class _CarFormPageState extends State<CarFormPage> {
   late String _status;
 
   bool _isSubmitting = false;
+  bool _isUploadingImage = false;
+  XFile? _pickedImage;
+  Uint8List? _pickedBytes;
+  String? _imageUrl;
   List<Showroom> _showrooms = [];
   bool _loadingShowrooms = false;
 
@@ -44,6 +58,7 @@ class _CarFormPageState extends State<CarFormPage> {
   void initState() {
     super.initState();
     final c = widget.car;
+    _imageUrl = c?.imageUrl;
     _titleController = TextEditingController(text: c?.title ?? '');
     _brandController = TextEditingController(text: c?.brand ?? '');
     _modelController = TextEditingController(text: c?.model ?? '');
@@ -97,10 +112,63 @@ class _CarFormPageState extends State<CarFormPage> {
   String? _emptyToNull(String value) =>
       value.trim().isEmpty ? null : value.trim();
 
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final file = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _pickedImage = file;
+        _pickedBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Image select nahi hui: $e')));
+    }
+  }
+
+  void _clearImage() {
+    setState(() {
+      _pickedImage = null;
+      _pickedBytes = null;
+      _imageUrl = null;
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
+
+    String? imageUrl = _imageUrl;
+    if (_pickedBytes != null) {
+      setState(() => _isUploadingImage = true);
+      try {
+        imageUrl = await _imageStorage.uploadImage(
+          bucket: ImageBuckets.carImages,
+          folder: 'cars',
+          bytes: _pickedBytes!,
+          contentType: _pickedImage?.mimeType ?? 'image/jpeg',
+          fileName: _pickedImage?.name ?? 'car.jpg',
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() => _isSubmitting = false);
+        setState(() => _isUploadingImage = false);
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Image upload fail: $e')));
+        return;
+      }
+    }
 
     final car = Car(
       id: widget.car?.id ?? 0,
@@ -115,6 +183,7 @@ class _CarFormPageState extends State<CarFormPage> {
       transmission: _transmission,
       condition: _condition,
       description: _emptyToNull(_descriptionController.text),
+      imageUrl: imageUrl,
       status: _status,
     );
 
@@ -132,7 +201,12 @@ class _CarFormPageState extends State<CarFormPage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to save car: $e')));
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _isUploadingImage = false;
+        });
+      }
     }
   }
 
@@ -368,6 +442,15 @@ class _CarFormPageState extends State<CarFormPage> {
                     maxLines: 4,
                     textInputAction: TextInputAction.newline,
                   ),
+                  const SizedBox(height: 20),
+                  ImagePickerField(
+                    label: 'Car Photo',
+                    bytes: _pickedBytes,
+                    existingUrl: _imageUrl,
+                    isUploading: _isUploadingImage,
+                    onPick: _pickImage,
+                    onClear: _clearImage,
+                  ),
                   const SizedBox(height: 16),
                   DropdownButtonFormField<String>(
                     initialValue: _status,
@@ -401,7 +484,7 @@ class _CarFormPageState extends State<CarFormPage> {
                               width: 24,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                               ),
                             )
                           : Text(_isEditing ? 'Update Car' : 'Add Car'),

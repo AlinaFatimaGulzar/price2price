@@ -10,6 +10,7 @@ class Showroom {
   final String? website;
   final double? latitude;
   final double? longitude;
+  final String? imageUrl;
   final String status;
   final double averageRating;
   final int reviewCount;
@@ -27,6 +28,7 @@ class Showroom {
     this.website,
     this.latitude,
     this.longitude,
+    this.imageUrl,
     this.status = 'pending',
     this.averageRating = 0.0,
     this.reviewCount = 0,
@@ -45,6 +47,7 @@ class Showroom {
     String? website,
     double? latitude,
     double? longitude,
+    String? imageUrl,
     String? status,
     double? averageRating,
     int? reviewCount,
@@ -62,6 +65,7 @@ class Showroom {
       website: website ?? this.website,
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
+      imageUrl: imageUrl ?? this.imageUrl,
       status: status ?? this.status,
       averageRating: averageRating ?? this.averageRating,
       reviewCount: reviewCount ?? this.reviewCount,
@@ -81,6 +85,7 @@ class Showroom {
       'website': website,
       'latitude': latitude,
       'longitude': longitude,
+      'image_url': imageUrl,
       'status': status,
     };
   }
@@ -97,6 +102,7 @@ class Showroom {
       'website': website,
       'latitude': latitude,
       'longitude': longitude,
+      'image_url': imageUrl,
       'status': status,
     };
   }
@@ -114,6 +120,7 @@ class Showroom {
       website: json['website'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      imageUrl: json['image_url'] as String?,
       status: json['status'] as String? ?? 'approved',
       averageRating: (json['average_rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: json['review_count'] as int? ?? 0,
@@ -134,6 +141,7 @@ class Showroom {
       'website': website,
       'latitude': latitude,
       'longitude': longitude,
+      'image_url': imageUrl,
       'status': status,
       'average_rating': averageRating,
       'review_count': reviewCount,

@@ -136,24 +136,24 @@ class _SignInUpPageState extends State<SignInUpPage> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF3A1510).withValues(alpha: 0.7),
+                color: AppColors.danger.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFB84725).withValues(alpha: 0.6),
+                  color: AppColors.danger.withValues(alpha: 0.5),
                 ),
               ),
               child: Row(
                 children: [
                   const Icon(
                     Icons.error_outline,
-                    color: Color(0xFFFFB4A6),
+                    color: AppColors.danger,
                     size: 20,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       _error!,
-                      style: const TextStyle(color: Color(0xFFFFB4A6)),
+                      style: const TextStyle(color: AppColors.danger),
                     ),
                   ),
                 ],

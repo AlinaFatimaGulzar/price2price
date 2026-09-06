@@ -120,7 +120,7 @@ void main() {
       ]);
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminReviewsPage(repository: repo),
         ),
       );
@@ -146,7 +146,7 @@ void main() {
       ]);
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminReviewsPage(repository: repo),
         ),
       );
@@ -176,7 +176,7 @@ void main() {
       ]);
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminLogsPage(repository: logs),
         ),
       );
@@ -192,7 +192,7 @@ void main() {
     testWidgets('logs page shows empty state', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminLogsPage(repository: _FakeAdminLogRepository(const [])),
         ),
       );
@@ -215,7 +215,7 @@ void main() {
       final logs = _FakeAdminLogRepository(const []);
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminReviewsPage(repository: repo, logRepository: logs),
         ),
       );

@@ -291,19 +291,30 @@ class _AdminCarCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            // Car thumbnail placeholder
+            // Car thumbnail
             Container(
               width: 84,
               height: 68,
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: AppColors.sage,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.directions_car,
-                color: AppColors.accent,
-                size: 36,
-              ),
+              child: car.imageUrl == null
+                  ? const Icon(
+                      Icons.directions_car,
+                      color: AppColors.accent,
+                      size: 36,
+                    )
+                  : Image.network(
+                      car.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.directions_car,
+                        color: AppColors.accent,
+                        size: 36,
+                      ),
+                    ),
             ),
             const SizedBox(width: 16),
             Expanded(

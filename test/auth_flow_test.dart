@@ -75,7 +75,7 @@ void main() {
       final repo = _FakeAuthRepository();
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: SignInUpPage(repository: repo),
         ),
       );
@@ -108,7 +108,7 @@ void main() {
       final repo = _FakeAuthRepository();
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: SignInUpPage(repository: repo),
         ),
       );
@@ -148,7 +148,7 @@ void main() {
       final repo = _FakeAuthRepository()..confirmEmailRequired = true;
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: SignInUpPage(repository: repo),
         ),
       );
@@ -186,7 +186,7 @@ void main() {
       final repo = _FakeAuthRepository()..signInFails = true;
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: SignInUpPage(repository: repo),
         ),
       );
@@ -221,7 +221,7 @@ void main() {
       var branched = false;
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: OtpVerificationPage.withMode(
             method: AuthMethod.email,
             identifier: 'buyer@example.com',

@@ -151,7 +151,7 @@ void main() {
       final cars = [_car(1, 1, 'Corolla Grande'), _car(2, 1, 'Civic Oriel')];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: BrowseCarsPage(repository: _FakeCustomerCarRepository(cars)),
         ),
       );
@@ -166,7 +166,7 @@ void main() {
       final cars = [_car(1, 1, 'Corolla Grande'), _car(2, 1, 'Civic Oriel')];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: BrowseCarsPage(repository: _FakeCustomerCarRepository(cars)),
         ),
       );
@@ -182,7 +182,7 @@ void main() {
     testWidgets('shows empty message when no cars', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: BrowseCarsPage(
             repository: _FakeCustomerCarRepository(const []),
           ),
@@ -197,7 +197,7 @@ void main() {
       final cars = [_car(1, 1, 'Corolla Grande')];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: BrowseCarsPage(repository: _FakeCustomerCarRepository(cars)),
         ),
       );
@@ -217,7 +217,7 @@ void main() {
       final cars = [_car(10, 3, 'Prime Corolla'), _car(11, 4, 'Other Civic')];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(cars),
@@ -236,7 +236,7 @@ void main() {
       final showroom = _showroom(3, 'Prime Auto');
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(const []),
@@ -256,7 +256,7 @@ void main() {
       final cars = [_car(10, 3, 'Prime Corolla')];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(cars),
@@ -288,7 +288,7 @@ void main() {
       final car = _car(10, 3, 'Prime Corolla');
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: CarDetailPage(
             car: car,
             showroomRepository: _FakeShowroomRepository([showroom]),
@@ -315,7 +315,7 @@ void main() {
       );
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: CarDetailPage(
             car: car,
             showroomRepository: _FakeShowroomRepository(const []),
@@ -354,7 +354,7 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(const []),
@@ -384,7 +384,7 @@ void main() {
       ];
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(const []),
@@ -404,7 +404,7 @@ void main() {
       final showroom = _showroom(3, 'Prime Auto');
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomDetailPage(
             showroom: showroom,
             carRepository: _FakeCustomerCarRepository(const []),
@@ -427,7 +427,7 @@ void main() {
         final showroom = _showroom(3, 'Prime Auto');
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light,
+            theme: AppTheme.dark,
             home: ShowroomDetailPage(
               showroom: showroom,
               carRepository: _FakeCustomerCarRepository(const []),

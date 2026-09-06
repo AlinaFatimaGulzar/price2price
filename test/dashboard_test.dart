@@ -44,7 +44,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: Scaffold(body: DashboardOverviewPage(repository: fake)),
         ),
       );

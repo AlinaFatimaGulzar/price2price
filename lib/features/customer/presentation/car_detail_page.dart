@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/launch_service.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/automotive_art.dart';
 import '../../cars/domain/car.dart';
 import '../../showrooms/data/showroom_repository.dart';
 import '../../showrooms/domain/showroom.dart';
@@ -48,13 +49,30 @@ class _CarDetailPageState extends State<CarDetailPage> {
             leading: Padding(
               padding: const EdgeInsets.all(6),
               child: Material(
-                color: AppColors.paper.withValues(alpha: 0.75),
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0x66070F14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: const BorderSide(color: AppColors.border),
+                ),
                 child: const BackButton(),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: _CarBigImage(image: car.imageUrl, car: car),
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _CarBigImage(image: car.imageUrl),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Color(0xCC071116)],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           SliverToBoxAdapter(
@@ -74,7 +92,7 @@ class _CarDetailPageState extends State<CarDetailPage> {
                       car.model ?? '',
                       car.year?.toString() ?? '',
                     ].where((s) => s.isNotEmpty).join(' · '),
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -96,13 +114,16 @@ class _CarDetailPageState extends State<CarDetailPage> {
                           decoration: BoxDecoration(
                             color: car.condition == 'new'
                                 ? AppColors.accent
-                                : AppColors.ink,
+                                : const Color(0x24FFFFFF),
                             borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.border),
                           ),
                           child: Text(
                             car.condition!.toUpperCase(),
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: car.condition == 'new'
+                                  ? AppColors.onAccent
+                                  : AppColors.ink,
                               fontWeight: FontWeight.w800,
                               fontSize: 12,
                             ),
@@ -214,6 +235,7 @@ class _SpecGrid extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
+                                color: AppColors.ink,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -232,40 +254,25 @@ class _SpecGrid extends StatelessWidget {
 }
 
 class _CarBigImage extends StatelessWidget {
-  const _CarBigImage({required this.image, required this.car});
+  const _CarBigImage({required this.image});
 
   final String? image;
-  final Car car;
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.sage, Color(0xFFB9D3C3)],
-        ),
-      ),
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.directions_car_filled,
-        size: 90,
-        color: AppColors.ink,
-      ),
-    );
+    final artwork = const AutomotiveArt(kind: AutomotiveKind.car);
 
-    if (image == null || image!.trim().isEmpty) return fallback;
+    if (image == null || image!.trim().isEmpty) return artwork;
 
     return Image.network(
       image!,
       fit: BoxFit.cover,
       width: double.infinity,
       height: double.infinity,
-      errorBuilder: (context, _, _) => fallback,
+      errorBuilder: (context, _, _) => artwork,
       loadingBuilder: (context, child, progress) {
         if (progress == null) return child;
-        return fallback;
+        return artwork;
       },
     );
   }
@@ -282,9 +289,9 @@ class _ShowroomPanel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.sage.withValues(alpha: 0.5),
+        color: const Color(0x0FFFFFFF),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.sage),
+        border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -301,15 +308,24 @@ class _ShowroomPanel extends StatelessWidget {
               ),
               Row(
                 children: [
-                  const Icon(Icons.star_rounded, size: 18, color: Colors.amber),
+                  const Icon(
+                    Icons.star_rounded,
+                    size: 18,
+                    color: AppColors.accent,
+                  ),
                   Text(
                     showroom.averageRating.toStringAsFixed(1),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: AppColors.ink,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          const Divider(height: 1),
           const SizedBox(height: 12),
           Row(
             children: [

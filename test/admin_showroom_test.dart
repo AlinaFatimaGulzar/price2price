@@ -69,7 +69,7 @@ void main() {
       final fake = _FakeAdminShowroomRepository();
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: ShowroomFormPage(repository: fake),
         ),
       );
@@ -128,7 +128,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: Scaffold(body: AdminShowroomsPage(repository: fake)),
         ),
       );

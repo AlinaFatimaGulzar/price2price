@@ -132,7 +132,7 @@ class _AuthRequestPageState extends State<AuthRequestPage> {
                               height: 22,
                               child: CircularProgressIndicator(
                                 strokeWidth: 2,
-                                color: Colors.white,
+                                color: AppColors.onAccent,
                               ),
                             )
                           : const Text('Send verification code'),

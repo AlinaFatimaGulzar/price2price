@@ -173,9 +173,10 @@ class _ProfileHeader extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [AppColors.ink, Color(0xFF2C4054)],
+          colors: [Color(0xFF16303F), Color(0xFF0A151C)],
         ),
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.accent.withValues(alpha: 0.25)),
       ),
       child: Row(
         children: [
@@ -185,7 +186,7 @@ class _ProfileHeader extends StatelessWidget {
             child: Text(
               _initials,
               style: const TextStyle(
-                color: Colors.white,
+                color: AppColors.onAccent,
                 fontSize: 22,
                 fontWeight: FontWeight.w800,
               ),
@@ -304,7 +305,7 @@ class _MenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = destructive ? AppColors.accentDark : AppColors.ink;
+    final color = destructive ? AppColors.danger : AppColors.ink;
     return Material(
       color: AppColors.surface,
       shape: RoundedRectangleBorder(

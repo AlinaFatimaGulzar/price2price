@@ -39,7 +39,7 @@ void main() {
       final fake = _FakeAdminAuthRepository(success: success);
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: AdminLoginPage(repository: fake),
         ),
       );

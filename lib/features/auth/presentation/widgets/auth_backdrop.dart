@@ -67,7 +67,7 @@ class _AuthBackdropState extends State<AuthBackdrop>
                 bottom: -60,
                 child: _Glow(
                   radius: 360,
-                  color: const Color(0xFF3E7BFA).withValues(alpha: 0.13),
+                  color: AppColors.accentDark.withValues(alpha: 0.16),
                 ),
               ),
               SafeArea(child: widget.child),

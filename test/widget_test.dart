@@ -9,7 +9,7 @@ void main() {
   group('Auth UI', () {
     testWidgets('Auth landing page renders buttons', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: AppTheme.light, home: const AuthLandingPage()),
+        MaterialApp(theme: AppTheme.dark, home: const AuthLandingPage()),
       );
 
       expect(
@@ -23,7 +23,7 @@ void main() {
 
     testWidgets('Home page renders showrooms list', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(theme: AppTheme.light, home: const HomePage()),
+        MaterialApp(theme: AppTheme.dark, home: const HomePage()),
       );
       await tester.pump(const Duration(milliseconds: 100));
 

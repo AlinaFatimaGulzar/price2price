@@ -146,13 +146,15 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      border: Border.all(color: Colors.red.shade200),
-                      borderRadius: BorderRadius.circular(8),
+                      color: AppColors.danger.withValues(alpha: 0.10),
+                      border: Border.all(
+                        color: AppColors.danger.withValues(alpha: 0.5),
+                      ),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: Text(
                       _error!,
-                      style: TextStyle(color: Colors.red.shade900),
+                      style: const TextStyle(color: AppColors.danger),
                     ),
                   ),
                 ],

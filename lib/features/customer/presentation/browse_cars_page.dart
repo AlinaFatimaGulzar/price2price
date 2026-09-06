@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/widgets/glass.dart';
+import '../../../core/widgets/status_pane.dart';
 import '../../cars/data/customer_car_repository.dart';
 import '../../cars/domain/car.dart';
 import 'car_detail_page.dart';
@@ -113,6 +115,14 @@ class _BrowseCarsPageState extends State<BrowseCarsPage> {
 
   int get _activeCount => _appliedFilters;
 
+  int _columnsFor(double width) => width >= 1100
+      ? 4
+      : width >= 760
+      ? 3
+      : width >= 480
+      ? 2
+      : 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,14 +147,19 @@ class _BrowseCarsPageState extends State<BrowseCarsPage> {
                 future: _carsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return LayoutBuilder(
+                      builder: (context, constraints) => CarSkeletonGrid(
+                        columns: _columnsFor(constraints.maxWidth),
+                      ),
+                    );
                   }
                   if (snapshot.hasError) {
-                    return _MessagePane(
+                    return StatusPane(
                       icon: Icons.error_outline,
-                      message: 'Could not load cars. Please try again.',
-                      buttonLabel: 'Retry',
-                      onButton: _reload,
+                      message: 'Could not load cars.',
+                      subtitle: 'Please try again.',
+                      actionLabel: 'Retry',
+                      onAction: _reload,
                     );
                   }
                   final cars = _applyFilters(
@@ -152,11 +167,12 @@ class _BrowseCarsPageState extends State<BrowseCarsPage> {
                     _searchController.text,
                   );
                   if (cars.isEmpty) {
-                    return _MessagePane(
+                    return StatusPane(
                       icon: Icons.search_off,
                       message: 'No cars match your search',
-                      buttonLabel: 'Clear filters',
-                      onButton: () {
+                      subtitle: 'Try clearing filters or changing keywords.',
+                      actionLabel: 'Clear filters',
+                      onAction: () {
                         _searchController.clear();
                         setState(() {
                           _fuel = null;
@@ -171,17 +187,10 @@ class _BrowseCarsPageState extends State<BrowseCarsPage> {
                   }
                   return LayoutBuilder(
                     builder: (context, constraints) {
-                      final columns = constraints.maxWidth >= 1100
-                          ? 4
-                          : constraints.maxWidth >= 760
-                          ? 3
-                          : constraints.maxWidth >= 480
-                          ? 2
-                          : 1;
                       return GridView.builder(
                         padding: const EdgeInsets.all(20),
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: columns,
+                          crossAxisCount: _columnsFor(constraints.maxWidth),
                           mainAxisSpacing: 18,
                           crossAxisSpacing: 18,
                           childAspectRatio: 0.86,
@@ -247,40 +256,6 @@ class _FilterChipsBar extends StatelessWidget {
             avatar: const Icon(Icons.sort, size: 18),
             label: Text(sortLabel),
             backgroundColor: AppColors.surface,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MessagePane extends StatelessWidget {
-  const _MessagePane({
-    required this.icon,
-    required this.message,
-    required this.buttonLabel,
-    required this.onButton,
-  });
-
-  final IconData icon;
-  final String message;
-  final String buttonLabel;
-  final VoidCallback onButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppColors.mutedInk),
-          const SizedBox(height: 16),
-          Text(message, style: Theme.of(context).textTheme.bodyLarge),
-          const SizedBox(height: 16),
-          OutlinedButton(
-            style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-            onPressed: onButton,
-            child: Text(buttonLabel),
           ),
         ],
       ),

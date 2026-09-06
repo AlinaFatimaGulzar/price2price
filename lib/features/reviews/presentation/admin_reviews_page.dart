@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/theme/app_theme.dart';
 import '../../../core/supabase/supabase_bootstrap.dart';
 import '../../../core/utils/formatters.dart';
 import '../../admin/data/admin_log_repository.dart';
@@ -215,7 +216,7 @@ class _AdminReviewCard extends StatelessWidget {
                   Icon(
                     i < review.rating ? Icons.star : Icons.star_border,
                     size: 18,
-                    color: Colors.amber,
+                    color: AppColors.accent,
                   ),
                 const SizedBox(width: 10),
                 Text(
@@ -278,15 +279,22 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: pending ? const Color(0xFFFFF4E0) : const Color(0xFFE7F5EC),
+        color: pending
+            ? AppColors.accent.withValues(alpha: 0.14)
+            : const Color(0x1A4ADE80),
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: pending
+              ? AppColors.accent.withValues(alpha: 0.45)
+              : const Color(0x664ADE80),
+        ),
       ),
       child: Text(
         pending ? 'PENDING' : 'APPROVED',
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w800,
-          color: pending ? const Color(0xFFB26A00) : const Color(0xFF1E7A46),
+          color: pending ? AppColors.accent : const Color(0xFF6BE29B),
           letterSpacing: 0.4,
         ),
       ),

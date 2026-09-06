@@ -1,14 +1,27 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../../../app/theme/app_theme.dart';
+import '../../../core/storage/image_storage_repository.dart';
+import '../../../core/widgets/image_picker_field.dart';
 
 import '../../showrooms/domain/showroom.dart';
 import '../data/supabase_admin_showroom_repository.dart';
 import '../domain/admin_showroom_repository.dart';
 
 class ShowroomFormPage extends StatefulWidget {
-  const ShowroomFormPage({super.key, this.showroom, this.repository});
+  const ShowroomFormPage({
+    super.key,
+    this.showroom,
+    this.repository,
+    this.imageStorage,
+  });
 
   final Showroom? showroom;
   final AdminShowroomRepository? repository;
+  final ImageStorageRepository? imageStorage;
 
   @override
   State<ShowroomFormPage> createState() => _ShowroomFormPageState();
@@ -18,6 +31,8 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
   final _formKey = GlobalKey<FormState>();
   late final AdminShowroomRepository _repository =
       widget.repository ?? const SupabaseAdminShowroomRepository();
+  late final ImageStorageRepository _imageStorage =
+      widget.imageStorage ?? const SupabaseImageStorageRepository();
 
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
@@ -32,6 +47,10 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
 
   late String _status;
   bool _isSubmitting = false;
+  bool _isUploadingImage = false;
+  XFile? _pickedImage;
+  Uint8List? _pickedBytes;
+  String? _imageUrl;
 
   bool get _isEditing => widget.showroom != null;
 
@@ -39,6 +58,7 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
   void initState() {
     super.initState();
     final s = widget.showroom;
+    _imageUrl = s?.imageUrl;
     _nameController = TextEditingController(text: s?.name ?? '');
     _descriptionController = TextEditingController(text: s?.description ?? '');
     _addressController = TextEditingController(text: s?.address ?? '');
@@ -76,6 +96,30 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
 
     setState(() => _isSubmitting = true);
 
+    String? imageUrl = _imageUrl;
+    if (_pickedBytes != null) {
+      setState(() => _isUploadingImage = true);
+      try {
+        imageUrl = await _imageStorage.uploadImage(
+          bucket: ImageBuckets.showroomImages,
+          folder: 'showrooms',
+          bytes: _pickedBytes!,
+          contentType: _pickedImage?.mimeType ?? 'image/jpeg',
+          fileName: _pickedImage?.name ?? 'showroom.jpg',
+        );
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isSubmitting = false;
+          _isUploadingImage = false;
+        });
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Image upload fail: $e')));
+        return;
+      }
+    }
+
     final showroom = Showroom(
       id: widget.showroom?.id ?? 0,
       name: _nameController.text.trim(),
@@ -90,6 +134,7 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
       website: _emptyToNull(_websiteController.text.trim()),
       latitude: _parseDouble(_latitudeController.text),
       longitude: _parseDouble(_longitudeController.text),
+      imageUrl: imageUrl,
       status: _status,
     );
 
@@ -107,7 +152,12 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
         context,
       ).showSnackBar(SnackBar(content: Text('Failed to save showroom: $e')));
     } finally {
-      if (mounted) setState(() => _isSubmitting = false);
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+          _isUploadingImage = false;
+        });
+      }
     }
   }
 
@@ -117,6 +167,37 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return null;
     return double.tryParse(trimmed);
+  }
+
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final file = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1600,
+        imageQuality: 85,
+      );
+      if (file == null) return;
+      final bytes = await file.readAsBytes();
+      if (!mounted) return;
+      setState(() {
+        _pickedImage = file;
+        _pickedBytes = bytes;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Image select nahi hui: $e')));
+    }
+  }
+
+  void _clearImage() {
+    setState(() {
+      _pickedImage = null;
+      _pickedBytes = null;
+      _imageUrl = null;
+    });
   }
 
   @override
@@ -245,6 +326,15 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
                 ],
               ),
               const SizedBox(height: 16),
+              ImagePickerField(
+                label: 'Showroom Photo',
+                bytes: _pickedBytes,
+                existingUrl: _imageUrl,
+                isUploading: _isUploadingImage,
+                onPick: _pickImage,
+                onClear: _clearImage,
+              ),
+              const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _status,
                 decoration: const InputDecoration(labelText: 'Status'),
@@ -268,7 +358,7 @@ class _ShowroomFormPageState extends State<ShowroomFormPage> {
                           width: 24,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            color: Colors.white,
+                            color: AppColors.onAccent,
                           ),
                         )
                       : Text(_isEditing ? 'Update Showroom' : 'Add Showroom'),

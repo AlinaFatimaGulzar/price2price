@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
 import '../../../core/services/launch_service.dart';
+import '../../../core/widgets/automotive_art.dart';
+import '../../../core/widgets/glass.dart';
 import '../../cars/data/customer_car_repository.dart';
 import '../../cars/domain/car.dart';
 import '../../reviews/data/review_repository.dart';
@@ -53,26 +55,37 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
             leading: Padding(
               padding: const EdgeInsets.all(6),
               child: Material(
-                color: AppColors.paper.withValues(alpha: 0.75),
-                borderRadius: BorderRadius.circular(14),
+                color: const Color(0x66070F14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                  side: const BorderSide(color: AppColors.border),
+                ),
                 child: const BackButton(),
               ),
             ),
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [AppColors.sage, Color(0xFFB9D3C3)],
+              background: Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (showroom.imageUrl == null)
+                    const AutomotiveArt(kind: AutomotiveKind.showroom)
+                  else
+                    Image.network(
+                      showroom.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const AutomotiveArt(kind: AutomotiveKind.showroom),
+                    ),
+                  const DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.transparent, Color(0xCC071116)],
+                      ),
+                    ),
                   ),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.storefront,
-                  size: 88,
-                  color: AppColors.ink,
-                ),
+                ],
               ),
             ),
           ),
@@ -99,12 +112,13 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
                                 const Icon(
                                   Icons.star_rounded,
                                   size: 20,
-                                  color: Colors.amber,
+                                  color: AppColors.accent,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   showroom.averageRating.toStringAsFixed(1),
                                   style: const TextStyle(
+                                    color: AppColors.ink,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -132,7 +146,7 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
                       Expanded(
                         child: Text(
                           '${showroom.address}, ${showroom.city}',
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),
                     ],
@@ -211,9 +225,22 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
                     ),
                   ],
                   const SizedBox(height: 28),
-                  Text(
-                    'Available Cars',
-                    style: Theme.of(context).textTheme.headlineSmall,
+                  Row(
+                    children: [
+                      Container(
+                        width: 4,
+                        height: 22,
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'Available Cars',
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
                 ],
@@ -224,10 +251,16 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
             future: _carsFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const SliverToBoxAdapter(
+                return SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
-                    child: Center(child: CircularProgressIndicator()),
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                    child: Column(
+                      children: const [
+                        SkeletonCarCard(aspect: 2.4),
+                        SizedBox(height: 18),
+                        SkeletonCarCard(aspect: 2.4),
+                      ],
+                    ),
                   ),
                 );
               }
@@ -241,11 +274,14 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
               }
               final cars = snapshot.data ?? [];
               if (cars.isEmpty) {
-                return const SliverToBoxAdapter(
+                return SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 40),
+                    padding: const EdgeInsets.symmetric(vertical: 32),
                     child: Center(
-                      child: Text('No cars available at this showroom yet'),
+                      child: Text(
+                        'No cars available at this showroom yet',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     ),
                   ),
                 );

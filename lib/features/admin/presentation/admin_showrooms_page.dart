@@ -279,6 +279,27 @@ class _AdminShowroomCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
+            if (showroom.imageUrl != null) ...[
+              Container(
+                width: 72,
+                height: 58,
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: AppColors.sage,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Image.network(
+                  showroom.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.store,
+                    color: AppColors.accent,
+                    size: 30,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+            ],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

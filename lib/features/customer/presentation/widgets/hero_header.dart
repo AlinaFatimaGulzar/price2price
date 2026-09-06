@@ -26,80 +26,83 @@ class HeroHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 26),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppColors.sage,
-            AppColors.accent.withValues(alpha: 0.14),
-            AppColors.paper,
-          ],
-          stops: const [0, 0.55, 1],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0E202A), Color(0xFF0A181F), AppColors.paper],
+          stops: [0, 0.72, 1],
         ),
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(28)),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 640;
-          final titleWidget = Text(
-            title,
-            style: Theme.of(context).textTheme.displaySmall,
-          );
-          final subtitleWidget = Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyLarge,
-          );
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final wide = constraints.maxWidth >= 640;
+            final titleWidget = Text(
+              title,
+              style: Theme.of(context).textTheme.displaySmall,
+            );
+            final subtitleWidget = Text(
+              subtitle,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontSize: 15, height: 1.5),
+            );
 
-          final searchBar = _StyledSearch(
-            controller: searchController,
-            hint: searchHint,
-            onChanged: onSearchChanged,
-          );
+            final searchBar = _StyledSearch(
+              controller: searchController,
+              hint: searchHint,
+              onChanged: onSearchChanged,
+            );
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface.withValues(alpha: 0.85),
-                      borderRadius: BorderRadius.circular(18),
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: const Color(0x0FFFFFFF),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 0.28),
+                        ),
+                      ),
+                      child: Icon(emoji, color: AppColors.accent, size: 34),
                     ),
-                    child: Icon(emoji, color: AppColors.accent, size: 34),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (wide) ...[titleWidget, const SizedBox(height: 8)],
-                        if (!wide)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: titleWidget,
-                          ),
-                        subtitleWidget,
-                        if (action != null) ...[
-                          const SizedBox(height: 12),
-                          action!,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (wide) ...[titleWidget, const SizedBox(height: 8)],
+                          if (!wide)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 6),
+                              child: titleWidget,
+                            ),
+                          subtitleWidget,
+                          if (action != null) ...[
+                            const SizedBox(height: 14),
+                            action!,
+                          ],
                         ],
-                      ],
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+                if (onSearchChanged != null) ...[
+                  const SizedBox(height: 20),
+                  searchBar,
                 ],
-              ),
-              if (onSearchChanged != null) ...[
-                const SizedBox(height: 20),
-                searchBar,
               ],
-            ],
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -117,14 +120,23 @@ class _StyledSearch extends StatelessWidget {
     return TextField(
       controller: controller,
       onChanged: onChanged,
+      style: const TextStyle(color: AppColors.ink),
       decoration: InputDecoration(
         hintText: hint ?? 'Search...',
-        prefixIcon: const Icon(Icons.search),
+        prefixIcon: const Icon(Icons.search, color: AppColors.accent),
         filled: true,
-        fillColor: AppColors.surface.withValues(alpha: 0.9),
+        fillColor: const Color(0x14FFFFFF),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.border),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
         ),
       ),
     );

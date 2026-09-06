@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/widgets/glass.dart';
+import '../../../core/widgets/status_pane.dart';
 import '../../admin/data/supabase_admin_auth_repository.dart';
 import '../../admin/domain/admin_auth_repository.dart';
 import '../../auth/data/session_repository.dart';
@@ -73,6 +75,12 @@ class _ShowroomsListPageState extends State<ShowroomsListPage> {
     super.dispose();
   }
 
+  int _columnsFor(double width) => width >= 1100
+      ? 3
+      : width >= 740
+      ? 2
+      : 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -127,8 +135,12 @@ class _ShowroomsListPageState extends State<ShowroomsListPage> {
             onSearchChanged: _search,
             action: OutlinedButton.icon(
               style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.accent,
                 minimumSize: const Size(0, 46),
-                backgroundColor: AppColors.surface.withValues(alpha: 0.9),
+                side: BorderSide(
+                  color: AppColors.accent.withValues(alpha: 0.45),
+                ),
+                backgroundColor: const Color(0x0FFFFFFF),
               ),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(builder: (_) => const BrowseCarsPage()),
@@ -142,40 +154,39 @@ class _ShowroomsListPageState extends State<ShowroomsListPage> {
               future: _showroomsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return LayoutBuilder(
+                    builder: (context, constraints) => ShowroomSkeletonGrid(
+                      columns: _columnsFor(constraints.maxWidth),
+                    ),
+                  );
                 }
 
                 if (snapshot.hasError) {
-                  return _MessagePaneShowrooms(
+                  return StatusPane(
                     icon: Icons.error_outline,
-                    message: 'Could not load showrooms. Please try again.',
-                    buttonLabel: 'Retry',
-                    onButton: _reload,
+                    message: 'Could not load showrooms.',
+                    subtitle: 'Please try again.',
+                    actionLabel: 'Retry',
+                    onAction: _reload,
                   );
                 }
 
                 final showrooms = snapshot.data ?? [];
 
                 if (showrooms.isEmpty) {
-                  return _MessagePaneShowrooms(
+                  return StatusPane(
                     icon: Icons.store_outlined,
                     message: 'No showrooms found',
-                    buttonLabel: '',
-                    onButton: () {},
+                    subtitle: 'Try a different search or check back soon.',
                   );
                 }
 
                 return LayoutBuilder(
                   builder: (context, constraints) {
-                    final columns = constraints.maxWidth >= 1100
-                        ? 3
-                        : constraints.maxWidth >= 740
-                        ? 2
-                        : 1;
                     return GridView.builder(
                       padding: const EdgeInsets.all(20),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: columns,
+                        crossAxisCount: _columnsFor(constraints.maxWidth),
                         mainAxisSpacing: 18,
                         crossAxisSpacing: 18,
                         childAspectRatio: 2.1,
@@ -199,42 +210,6 @@ class _ShowroomsListPageState extends State<ShowroomsListPage> {
               },
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _MessagePaneShowrooms extends StatelessWidget {
-  const _MessagePaneShowrooms({
-    required this.icon,
-    required this.message,
-    required this.buttonLabel,
-    required this.onButton,
-  });
-
-  final IconData icon;
-  final String message;
-  final String buttonLabel;
-  final VoidCallback onButton;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppColors.mutedInk),
-          const SizedBox(height: 16),
-          Text(message, style: Theme.of(context).textTheme.bodyLarge),
-          if (buttonLabel.isNotEmpty) ...[
-            const SizedBox(height: 16),
-            OutlinedButton(
-              style: OutlinedButton.styleFrom(minimumSize: const Size(0, 48)),
-              onPressed: onButton,
-              child: Text(buttonLabel),
-            ),
-          ],
         ],
       ),
     );

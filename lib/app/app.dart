@@ -29,7 +29,7 @@ class _P2PAppState extends State<P2PApp> {
     return MaterialApp(
       title: 'P2P Showrooms',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light.copyWith(
+      theme: AppTheme.dark.copyWith(
         pageTransitionsTheme: const PageTransitionsTheme(
           builders: {
             TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
@@ -90,7 +90,7 @@ class _SessionAwareSplashState extends State<_SessionAwareSplash> {
       future: _isUserLoggedIn(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SplashPage(nextPage: Container(color: Colors.white));
+          return SplashPage(nextPage: const ColoredBox(color: AppColors.paper));
         }
         if (snapshot.data == true) {
           return const HomePage();

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_theme.dart';
-import '../../../../core/widgets/tilt_3d.dart';
 import '../../../../core/utils/formatters.dart';
+import '../../../../core/widgets/automotive_art.dart';
+import '../../../../core/widgets/tilt_3d.dart';
 import '../../../cars/domain/car.dart';
 
 class CustomerCarCard extends StatelessWidget {
@@ -24,11 +25,7 @@ class CustomerCarCard extends StatelessWidget {
     return Tilt3D(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: AppColors.border),
-        ),
+        decoration: AppGlass.card(radius: 22),
         clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -91,6 +88,7 @@ class CustomerCarCard extends StatelessWidget {
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         color: AppColors.accent,
                         fontWeight: FontWeight.w800,
+                        fontSize: 17,
                       ),
                     ),
                   ],
@@ -112,45 +110,53 @@ class _CarImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fallback = Container(
+    final artwork = DecoratedBox(
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.sage, Color(0xFFB9D3C3)],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0C1B23), Color(0xFF081118)],
         ),
       ),
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.directions_car_filled,
-        size: 54,
-        color: AppColors.ink,
-      ),
+      child: const AutomotiveArt(kind: AutomotiveKind.car),
     );
 
-    final imageWidget = image == null || image!.trim().isEmpty
-        ? fallback
-        : Image.network(
-            image!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, _, _) => fallback,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return fallback;
-            },
-          );
+    final Widget imageWidget;
+    if (image == null || image!.trim().isEmpty) {
+      imageWidget = artwork;
+    } else {
+      imageWidget = Image.network(
+        image!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (context, _, _) => artwork,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return artwork;
+        },
+      );
+    }
 
     return Stack(
       fit: StackFit.expand,
       children: [
         imageWidget,
+        // Soft dark scrim so chips stay legible over photography.
+        const DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [Colors.transparent, Color(0x6000080C)],
+            ),
+          ),
+        ),
         Positioned(
           top: 10,
           left: 10,
           child: _Chip(
-            color: car.condition == 'new' ? AppColors.accent : AppColors.ink,
+            kind: car.condition == 'new' ? _ChipKind.gold : _ChipKind.glass,
             label: car.condition == 'new' ? 'NEW' : 'USED',
           ),
         ),
@@ -158,34 +164,39 @@ class _CarImage extends StatelessWidget {
           Positioned(
             top: 10,
             right: 10,
-            child: _Chip(
-              color: AppColors.ink.withValues(alpha: 0.75),
-              label: car.fuel!.toUpperCase(),
-            ),
+            child: _Chip(kind: _ChipKind.dark, label: car.fuel!.toUpperCase()),
           ),
       ],
     );
   }
 }
 
-class _Chip extends StatelessWidget {
-  const _Chip({required this.color, required this.label});
+enum _ChipKind { gold, glass, dark }
 
-  final Color color;
+class _Chip extends StatelessWidget {
+  const _Chip({required this.kind, required this.label});
+
+  final _ChipKind kind;
   final String label;
 
   @override
   Widget build(BuildContext context) {
+    final (background, foreground) = switch (kind) {
+      _ChipKind.gold => (AppColors.accent, AppColors.onAccent),
+      _ChipKind.glass => (const Color(0x24FFFFFF), AppColors.ink),
+      _ChipKind.dark => (const Color(0x6600070B), Colors.white),
+    };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: color,
+        color: background,
         borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: foreground,
           fontSize: 11,
           fontWeight: FontWeight.w800,
           letterSpacing: 0.4,

@@ -128,7 +128,7 @@ void main() {
         final launcher = _RecordingLaunchService();
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light,
+            theme: AppTheme.dark,
             home: ShowroomDetailPage(
               showroom: _showroom(),
               carRepository: _FakeCustomerCarRepository(const []),
@@ -162,7 +162,7 @@ void main() {
         final launcher = _RecordingLaunchService();
         await tester.pumpWidget(
           MaterialApp(
-            theme: AppTheme.light,
+            theme: AppTheme.dark,
             home: CarDetailPage(
               car: _car(),
               showroomRepository: _SingleShowroomRepository(_showroom()),

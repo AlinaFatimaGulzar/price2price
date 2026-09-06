@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/widgets/car_hero.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key, required this.nextPage});
@@ -52,45 +53,62 @@ class _SplashPageState extends State<SplashPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.ink,
-      body: Center(
-        child: ScaleTransition(
-          scale: _scale,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 88,
-                height: 88,
-                decoration: BoxDecoration(
-                  color: AppColors.accent,
-                  borderRadius: BorderRadius.circular(26),
+      backgroundColor: AppColors.paper,
+      body: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: RadialGradient(
+            center: const Alignment(0, -0.2),
+            radius: 1.1,
+            colors: [const Color(0xFF0E1F28), AppColors.paper],
+          ),
+        ),
+        child: Center(
+          child: ScaleTransition(
+            scale: _scale,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 104,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    color: const Color(0x0FFFFFFF),
+                    borderRadius: BorderRadius.circular(26),
+                    border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.35),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.14),
+                        blurRadius: 34,
+                        offset: const Offset(0, 14),
+                      ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: const CarHero(size: 150),
                 ),
-                child: const Icon(
-                  Icons.directions_car_filled_rounded,
-                  size: 46,
-                  color: Colors.white,
+                const SizedBox(height: 26),
+                const Text(
+                  'P2P',
+                  style: TextStyle(
+                    color: AppColors.ink,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'P2P',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 38,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
+                const SizedBox(height: 8),
+                const Text(
+                  'Gujranwala showrooms, closer to you',
+                  style: TextStyle(
+                    color: AppColors.mutedInk,
+                    fontSize: 14,
+                    letterSpacing: 0.2,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Gujranwala showrooms, closer to you',
-                style: TextStyle(
-                  color: Colors.white.withValues(alpha: 0.7),
-                  fontSize: 14,
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

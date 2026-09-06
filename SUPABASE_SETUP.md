@@ -1,6 +1,6 @@
 # Supabase setup
 
-Create a Supabase project, then run the app with the public project URL and anon key:
+The app ships with the project's Supabase URL and publishable key baked in (`lib/core/config/app_config.dart`), so plain `flutter run` connects automatically. To point at a different project, override them at build/run time:
 
 ```powershell
 flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co --dart-define=SUPABASE_PUBLISHABLE_KEY=your-publishable-key
@@ -8,7 +8,7 @@ flutter run --dart-define=SUPABASE_URL=https://your-project.supabase.co --dart-d
 
 Use only the public publishable key in the Flutter app. Never place a Supabase service-role key in source code, app binaries, or client configuration.
 
-For local development without Supabase credentials, run `flutter run`; the app starts with the local UI foundation and does not attempt a network connection.
+Without any credentials the app starts with the local UI foundation and does not attempt a network connection.
 
 ## Required tables
 
@@ -265,4 +265,61 @@ select u.id, u.email, coalesce(u.raw_user_meta_data->>'full_name', '')
   from auth.users u
   left join public.profiles p on p.id = u.id
  where p.id is null;
+```
+
+### Car / showroom images (Storage)
+
+Adds an `image_url` column on `showrooms` and creates two public storage buckets (`car-images`, `showroom-images`) where admins upload car and showroom photos. Public read for everyone; write is limited to admins via `public.is_admin()`.
+
+```sql
+alter table public.showrooms
+  add column if not exists image_url text;
+
+insert into storage.buckets (id, name, public)
+values ('car-images', 'car-images', true),
+       ('showroom-images', 'showroom-images', true)
+on conflict (id) do nothing;
+
+drop policy if exists "public read car-images" on storage.objects;
+drop policy if exists "admin insert car-images" on storage.objects;
+drop policy if exists "admin update car-images" on storage.objects;
+drop policy if exists "admin delete car-images" on storage.objects;
+drop policy if exists "public read showroom-images" on storage.objects;
+drop policy if exists "admin insert showroom-images" on storage.objects;
+drop policy if exists "admin update showroom-images" on storage.objects;
+drop policy if exists "admin delete showroom-images" on storage.objects;
+
+create policy "public read car-images"
+  on storage.objects for select
+  using (bucket_id = 'car-images');
+
+create policy "admin insert car-images"
+  on storage.objects for insert
+  with check (bucket_id = 'car-images' and public.is_admin());
+
+create policy "admin update car-images"
+  on storage.objects for update
+  using (bucket_id = 'car-images' and public.is_admin())
+  with check (bucket_id = 'car-images' and public.is_admin());
+
+create policy "admin delete car-images"
+  on storage.objects for delete
+  using (bucket_id = 'car-images' and public.is_admin());
+
+create policy "public read showroom-images"
+  on storage.objects for select
+  using (bucket_id = 'showroom-images');
+
+create policy "admin insert showroom-images"
+  on storage.objects for insert
+  with check (bucket_id = 'showroom-images' and public.is_admin());
+
+create policy "admin update showroom-images"
+  on storage.objects for update
+  using (bucket_id = 'showroom-images' and public.is_admin())
+  with check (bucket_id = 'showroom-images' and public.is_admin());
+
+create policy "admin delete showroom-images"
+  on storage.objects for delete
+  using (bucket_id = 'showroom-images' and public.is_admin());
 ```

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../widgets/tilt_3d.dart';
+import '../../app/theme/app_theme.dart';
 
 /// A stylized 3D sports sedan that subtly floats, breathes a light sheen
 /// across its body, and tilts to follow the cursor on desktop. Painted with
@@ -83,8 +84,8 @@ class _CarPainter extends CustomPainter {
           RadialGradient(
             center: Alignment(0, 0),
             colors: [
-              const Color(0xFFE66A3C).withValues(alpha: 0.28),
-              const Color(0xFFE66A3C).withValues(alpha: 0),
+              AppColors.accent.withValues(alpha: 0.28),
+              AppColors.accent.withValues(alpha: 0),
             ],
           ).createShader(
             Rect.fromCenter(
@@ -134,7 +135,7 @@ class _CarPainter extends CustomPainter {
       ..lineTo(w * 0.94, h * 0.49)
       ..quadraticBezierTo(w * 0.5, h * 0.41, w * 0.06, h * 0.49)
       ..close();
-    canvas.drawPath(stripe, Paint()..color = const Color(0xFFE66A3C));
+    canvas.drawPath(stripe, Paint()..color = AppColors.accent);
 
     // Glass cabin.
     final glass = Path()
@@ -210,11 +211,7 @@ class _CarPainter extends CustomPainter {
           spokes,
         );
       }
-      canvas.drawCircle(
-        wheelCenter,
-        hubR,
-        Paint()..color = const Color(0xFFE66A3C),
-      );
+      canvas.drawCircle(wheelCenter, hubR, Paint()..color = AppColors.accent);
     }
 
     // Accent headlight.

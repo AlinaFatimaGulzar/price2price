@@ -14,6 +14,10 @@ abstract final class SupabaseBootstrap {
 
   static SupabaseClient? get client {
     if (!AppConfig.hasSupabaseConfig) return null;
-    return Supabase.instance.client;
+    try {
+      return Supabase.instance.client;
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -143,7 +143,7 @@ void main() {
       final fake = _FakeAdminCarRepository();
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: CarFormPage(repository: fake),
         ),
       );
@@ -207,7 +207,7 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: AppTheme.light,
+          theme: AppTheme.dark,
           home: Scaffold(body: AdminCarsPage(repository: fake)),
         ),
       );
