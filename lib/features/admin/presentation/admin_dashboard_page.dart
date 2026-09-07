@@ -7,6 +7,7 @@ import '../../dashboard/data/supabase_dashboard_stats_repository.dart';
 import '../../dashboard/domain/dashboard_stats.dart';
 import '../../dashboard/domain/dashboard_stats_repository.dart';
 import '../../reviews/presentation/admin_reviews_page.dart';
+import 'admin_enquiries_page.dart';
 import 'admin_logs_page.dart';
 import 'admin_showrooms_page.dart';
 
@@ -74,6 +75,10 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 label: Text('Reviews'),
               ),
               NavigationRailDestination(
+                icon: Icon(Icons.forum_outlined),
+                label: Text('Enquiries'),
+              ),
+              NavigationRailDestination(
                 icon: Icon(Icons.history),
                 label: Text('Logs'),
               ),
@@ -88,6 +93,7 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
                 AdminShowroomsPage(),
                 AdminCarsPage(),
                 AdminReviewsPage(),
+                AdminEnquiriesPage(),
                 AdminLogsPage(),
               ],
             ),

@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_theme.dart';
-import '../../home/presentation/home_page.dart';
+import '../../customer/presentation/customer_shell.dart';
 import '../domain/auth_repository.dart';
 import 'widgets/auth_shell.dart';
 
@@ -42,7 +42,7 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
       await widget.repository.updatePassword(newPassword: password);
       if (!mounted) return;
       await Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => const HomePage()),
+        MaterialPageRoute<void>(builder: (_) => const CustomerShell()),
         (route) => false,
       );
     } on AuthNotConfiguredException {

@@ -323,3 +323,39 @@ create policy "admin delete showroom-images"
   on storage.objects for delete
   using (bucket_id = 'showroom-images' and public.is_admin());
 ```
+
+### Customer enquiries
+
+Customers submit a Name + Phone + Message from a car or showroom detail page ("Send Enquiry"). Anyone (even logged-out) can insert; only admins can read the list and move status between `new` → `contacted` → `done`.
+
+```sql
+create table if not exists public.enquiries (
+  id bigint generated always as identity primary key,
+  name text not null,
+  phone text not null,
+  message text not null,
+  car_id bigint references public.cars (id) on delete set null,
+  showroom_id bigint references public.showrooms (id) on delete set null,
+  car_title text,
+  showroom_name text,
+  status text not null default 'new' check (status in ('new', 'contacted', 'done')),
+  created_at timestamptz not null default now()
+);
+
+alter table public.enquiries enable row level security;
+
+create policy "anyone can submit enquiries"
+  on public.enquiries for insert
+  with check (true);
+
+create policy "admins view enquiries"
+  on public.enquiries for select
+  using (public.is_admin());
+
+create policy "admins update enquiries"
+  on public.enquiries for update
+  using (public.is_admin())
+  with check (public.is_admin());
+
+create index if not exists enquiries_created_idx on public.enquiries (created_at desc);
+```

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/widgets/glass.dart';
 import '../../showrooms/domain/showroom.dart';
 import '../data/supabase_admin_showroom_repository.dart';
 import '../domain/admin_showroom_repository.dart';
@@ -118,22 +119,46 @@ class _AdminShowroomsPageState extends State<AdminShowroomsPage> {
   }) {
     return showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: isDanger ? Colors.red : AppColors.accent,
+      builder: (context) => LiquidDialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                color: AppColors.ink,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(confirmLabel),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: const TextStyle(color: AppColors.mutedInk, height: 1.5),
+            ),
+            const SizedBox(height: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: isDanger
+                        ? AppColors.warning
+                        : AppColors.accent,
+                  ),
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: Text(confirmLabel),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -263,11 +288,11 @@ class _AdminShowroomCard extends StatelessWidget {
   Color _statusColor(String status) {
     switch (status) {
       case 'approved':
-        return Colors.green;
+        return AppColors.success;
       case 'rejected':
-        return Colors.red;
+        return AppColors.mutedInk;
       default:
-        return Colors.orange;
+        return AppColors.warning;
     }
   }
 
@@ -363,20 +388,20 @@ class _AdminShowroomCard extends StatelessWidget {
                     onPressed: onApprove,
                     icon: const Icon(Icons.check_circle_outline),
                     tooltip: 'Approve',
-                    color: Colors.green,
+                    color: AppColors.success,
                   ),
                 if (showroom.status != 'rejected')
                   IconButton(
                     onPressed: onReject,
                     icon: const Icon(Icons.cancel_outlined),
                     tooltip: 'Reject',
-                    color: Colors.red,
+                    color: AppColors.warning,
                   ),
                 IconButton(
                   onPressed: onDelete,
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Delete',
-                  color: Colors.red,
+                  color: AppColors.warning,
                 ),
               ],
             ),

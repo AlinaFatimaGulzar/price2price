@@ -9,6 +9,10 @@ abstract final class SupabaseBootstrap {
     await Supabase.initialize(
       url: AppConfig.supabaseUrl,
       publishableKey: AppConfig.supabasePublishableKey,
+      authOptions: const FlutterAuthClientOptions(
+        authFlowType: AuthFlowType.pkce,
+        persistSession: true,
+      ),
     );
   }
 

@@ -1,11 +1,13 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../app/theme/app_theme.dart';
-import '../../home/presentation/home_page.dart';
+import '../../customer/presentation/customer_shell.dart';
 import '../data/supabase_auth_repository.dart';
 import '../domain/auth_repository.dart';
 import 'auth_request_page.dart';
 import 'forgot_password_page.dart';
+import 'otp_verification_page.dart';
 import 'widgets/auth_shell.dart';
 
 /// Customer sign in / create account. A single glass card that slides
@@ -28,7 +30,6 @@ class _SignInUpPageState extends State<SignInUpPage> {
   bool _obscurePassword = true;
   bool _obscureConfirm = true;
   String? _error;
-  String? _success;
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -39,7 +40,6 @@ class _SignInUpPageState extends State<SignInUpPage> {
     setState(() {
       _signUp = signUp;
       _error = null;
-      _success = null;
     });
   }
 
@@ -71,7 +71,6 @@ class _SignInUpPageState extends State<SignInUpPage> {
     setState(() {
       _submitting = true;
       _error = null;
-      _success = null;
     });
 
     try {
@@ -82,8 +81,12 @@ class _SignInUpPageState extends State<SignInUpPage> {
             password: password,
             fullName: _nameController.text.trim(),
           );
-        } on AuthEmailConfirmationRequiredException catch (e) {
-          if (mounted) setState(() => _success = e.toString());
+        } on AuthEmailConfirmationRequiredException {
+          // The account exists but is unconfirmed. Confirm it instantly with
+          // a one-time code (that email always arrives) instead of leaving the
+          // user waiting on a confirmation email. Verifying also confirms the
+          // address, so this is the only code they will ever need.
+          await _finishSignUpWithOtp(email);
           return;
         }
       } else {
@@ -91,18 +94,54 @@ class _SignInUpPageState extends State<SignInUpPage> {
       }
       if (!mounted) return;
       await Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(builder: (_) => const HomePage()),
+        MaterialPageRoute<void>(builder: (_) => const CustomerShell()),
         (route) => false,
       );
     } on AuthInvalidCredentialsException catch (e) {
       if (mounted) setState(() => _error = e.toString());
     } on AuthNotConfiguredException {
       if (mounted) setState(() => _error = 'Connect Supabase to continue.');
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
     } catch (_) {
       if (mounted) setState(() => _error = 'Something went wrong. Try again.');
     } finally {
       if (mounted) setState(() => _submitting = false);
     }
+  }
+
+  Future<void> _finishSignUpWithOtp(String email) async {
+    try {
+      await _repository.requestOtp(
+        method: AuthMethod.email,
+        identifier: email,
+      );
+    } on AuthNotConfiguredException {
+      if (mounted) {
+        setState(() => _error = 'Connect Supabase before requesting a code.');
+      }
+      return;
+    } on AuthException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+      return;
+    } catch (_) {
+      if (mounted) {
+        setState(() => _error = 'We could not send your verification code. Try again.');
+      }
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (_) => OtpVerificationPage(
+          method: AuthMethod.email,
+          identifier: email,
+          repository: _repository,
+          title: 'Almost there — check your email',
+        ),
+      ),
+      (route) => false,
+    );
   }
 
   @override
@@ -159,10 +198,6 @@ class _SignInUpPageState extends State<SignInUpPage> {
                 ],
               ),
             ),
-          ],
-          if (_success != null) ...[
-            const SizedBox(height: 14),
-            _SuccessNotice(message: _success!),
           ],
           const SizedBox(height: 20),
           SizedBox(
@@ -391,42 +426,6 @@ class _Divider extends StatelessWidget {
         ),
         Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.18))),
       ],
-    );
-  }
-}
-
-class _SuccessNotice extends StatelessWidget {
-  const _SuccessNotice({required this.message});
-
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0E2B1E).withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFF2E7D5B).withValues(alpha: 0.6),
-        ),
-      ),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.mark_email_read_outlined,
-            color: Color(0xFF7ED9B0),
-            size: 20,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(color: Color(0xFF7ED9B0)),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

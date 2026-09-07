@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import '../../../../app/theme/app_theme.dart';
-import '../../home/presentation/home_page.dart';
+import '../../customer/presentation/customer_shell.dart';
 import '../domain/auth_repository.dart';
 import 'widgets/auth_shell.dart';
 
@@ -14,7 +14,7 @@ class OtpVerificationPage extends StatefulWidget {
     required this.method,
     required this.identifier,
     required this.repository,
-    this.title = 'Verify your code',
+    this.title = 'Enter your code',
     this.onVerified,
   });
 
@@ -71,7 +71,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
         await widget.onVerified!();
       } else {
         await Navigator.of(context).pushReplacement(
-          MaterialPageRoute<void>(builder: (_) => const HomePage()),
+          MaterialPageRoute<void>(builder: (_) => const CustomerShell()),
         );
       }
     } on AuthNotConfiguredException {
@@ -96,7 +96,7 @@ class _OtpVerificationPageState extends State<OtpVerificationPage> {
   @override
   Widget build(BuildContext context) {
     return AuthShell(
-      title: 'Enter your code',
+      title: widget.title,
       subtitle: 'We sent a one-time code to your $_destinationLabel.',
       showCar: true,
       child: Form(

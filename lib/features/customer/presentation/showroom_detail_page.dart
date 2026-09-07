@@ -6,6 +6,9 @@ import '../../../core/widgets/automotive_art.dart';
 import '../../../core/widgets/glass.dart';
 import '../../cars/data/customer_car_repository.dart';
 import '../../cars/domain/car.dart';
+import '../../enquiries/data/supabase_enquiry_repository.dart';
+import '../../enquiries/domain/enquiry_repository.dart';
+import '../../enquiries/presentation/enquiry_sheet.dart';
 import '../../reviews/data/review_repository.dart';
 import '../../showrooms/domain/showroom.dart';
 import 'car_detail_page.dart';
@@ -18,12 +21,14 @@ class ShowroomDetailPage extends StatefulWidget {
     required this.showroom,
     this.carRepository,
     this.reviewRepository,
+    this.enquiryRepository,
     this.launchService = const UrlLaunchService(),
   });
 
   final Showroom showroom;
   final CustomerCarRepository? carRepository;
   final ReviewRepository? reviewRepository;
+  final EnquiryRepository? enquiryRepository;
   final LaunchService launchService;
 
   @override
@@ -33,6 +38,8 @@ class ShowroomDetailPage extends StatefulWidget {
 class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
   late final CustomerCarRepository _repository =
       widget.carRepository ?? const SupabaseCustomerCarRepository();
+  late final EnquiryRepository _enquiryRepository =
+      widget.enquiryRepository ?? const SupabaseEnquiryRepository();
   late Future<List<Car>> _carsFuture;
 
   @override
@@ -194,6 +201,24 @@ class _ShowroomDetailPageState extends State<ShowroomDetailPage> {
                       ],
                     ),
                   ],
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        minimumSize: const Size(0, 50),
+                        side: const BorderSide(color: AppColors.accent),
+                      ),
+                      onPressed: () => showEnquirySheet(
+                        context,
+                        repository: _enquiryRepository,
+                        showroomId: showroom.id,
+                        showroomName: showroom.name,
+                      ),
+                      icon: const Icon(Icons.forum_outlined, size: 18),
+                      label: const Text('Send Enquiry'),
+                    ),
+                  ),
                   if (showroom.email != null ||
                       showroom.latitude != null ||
                       showroom.longitude != null) ...[

@@ -5,6 +5,9 @@ import '../../../core/services/launch_service.dart';
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/automotive_art.dart';
 import '../../cars/domain/car.dart';
+import '../../enquiries/data/supabase_enquiry_repository.dart';
+import '../../enquiries/domain/enquiry_repository.dart';
+import '../../enquiries/presentation/enquiry_sheet.dart';
 import '../../showrooms/data/showroom_repository.dart';
 import '../../showrooms/domain/showroom.dart';
 
@@ -13,11 +16,13 @@ class CarDetailPage extends StatefulWidget {
     super.key,
     required this.car,
     this.showroomRepository,
+    this.enquiryRepository,
     this.launchService = const UrlLaunchService(),
   });
 
   final Car car;
   final ShowroomRepository? showroomRepository;
+  final EnquiryRepository? enquiryRepository;
   final LaunchService launchService;
 
   @override
@@ -27,6 +32,8 @@ class CarDetailPage extends StatefulWidget {
 class _CarDetailPageState extends State<CarDetailPage> {
   late final ShowroomRepository _repository =
       widget.showroomRepository ?? const SupabaseShowroomRepository();
+  late final EnquiryRepository _enquiryRepository =
+      widget.enquiryRepository ?? const SupabaseEnquiryRepository();
   late Future<Showroom?> _showroomFuture;
 
   @override
@@ -169,6 +176,8 @@ class _CarDetailPageState extends State<CarDetailPage> {
                       }
                       return _ShowroomPanel(
                         showroom: showroom,
+                        car: car,
+                        enquiryRepository: _enquiryRepository,
                         launchService: widget.launchService,
                       );
                     },
@@ -279,9 +288,16 @@ class _CarBigImage extends StatelessWidget {
 }
 
 class _ShowroomPanel extends StatelessWidget {
-  const _ShowroomPanel({required this.showroom, required this.launchService});
+  const _ShowroomPanel({
+    required this.showroom,
+    required this.car,
+    required this.enquiryRepository,
+    required this.launchService,
+  });
 
   final Showroom showroom;
+  final Car car;
+  final EnquiryRepository enquiryRepository;
   final LaunchService launchService;
 
   @override
@@ -377,6 +393,26 @@ class _ShowroomPanel extends StatelessWidget {
               ],
             ),
           ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              style: OutlinedButton.styleFrom(
+                minimumSize: const Size(0, 48),
+                side: const BorderSide(color: AppColors.accent),
+              ),
+              onPressed: () => showEnquirySheet(
+                context,
+                repository: enquiryRepository,
+                carId: car.id,
+                carTitle: car.title,
+                showroomId: showroom.id,
+                showroomName: showroom.name,
+              ),
+              icon: const Icon(Icons.forum_outlined, size: 18),
+              label: const Text('Send Enquiry'),
+            ),
+          ),
         ],
       ),
     );

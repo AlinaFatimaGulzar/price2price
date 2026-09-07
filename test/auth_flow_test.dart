@@ -10,6 +10,7 @@ class _FakeAuthRepository implements AuthRepository {
   final List<String> createdEmails = [];
   final List<String> signedInEmails = [];
   final List<String> verified = [];
+  final List<String> requestedOtps = [];
   String updatePasswordValue = '';
   int updatePasswordCalls = 0;
 
@@ -20,7 +21,9 @@ class _FakeAuthRepository implements AuthRepository {
   Future<void> requestOtp({
     required AuthMethod method,
     required String identifier,
-  }) async {}
+  }) async {
+    requestedOtps.add(identifier);
+  }
 
   @override
   Future<void> verifyOtp({
@@ -141,7 +144,7 @@ void main() {
       expect(repo.createdEmails, ['ayesha@example.com']);
     });
 
-    testWidgets('sign up shows confirm-email notice when session is pending', (
+    testWidgets('sign up continues to OTP verification when confirmation is pending', (
       tester,
     ) async {
       tallViewport(tester);
@@ -176,9 +179,12 @@ void main() {
       );
       await tester.tap(find.text('Create account').last);
       await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      await tester.pump();
 
-      expect(find.textContaining('Check your inbox'), findsOneWidget);
       expect(repo.createdEmails, ['ayesha@example.com']);
+      expect(repo.requestedOtps, ['ayesha@example.com']);
+      expect(find.text('Almost there — check your email'), findsOneWidget);
     });
 
     testWidgets('sign in surfaces invalid credentials message', (tester) async {

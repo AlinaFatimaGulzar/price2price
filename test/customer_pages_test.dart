@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:p2p/app/theme/app_theme.dart';
@@ -7,6 +7,8 @@ import 'package:p2p/features/cars/domain/car.dart';
 import 'package:p2p/features/customer/presentation/browse_cars_page.dart';
 import 'package:p2p/features/customer/presentation/car_detail_page.dart';
 import 'package:p2p/features/customer/presentation/showroom_detail_page.dart';
+import 'package:p2p/features/enquiries/domain/enquiry.dart';
+import 'package:p2p/features/enquiries/domain/enquiry_repository.dart';
 import 'package:p2p/features/reviews/data/review_repository.dart';
 import 'package:p2p/features/reviews/domain/showroom_review.dart';
 import 'package:p2p/features/showrooms/data/showroom_repository.dart';
@@ -145,6 +147,33 @@ class _FakeReviewRepository implements ReviewRepository {
   }
 }
 
+class _FakeCustomerEnquiryRepository implements EnquiryRepository {
+  _FakeCustomerEnquiryRepository();
+
+  final List<String> submitted = [];
+
+  @override
+  Future<void> submitEnquiry({
+    required String name,
+    required String phone,
+    required String message,
+    int? carId,
+    int? showroomId,
+    String? carTitle,
+    String? showroomName,
+  }) async {
+    submitted.add(
+      '$name|$phone|$message|$carId|$showroomId|$carTitle|$showroomName',
+    );
+  }
+
+  @override
+  Future<List<Enquiry>> getAllEnquiries() async => [];
+
+  @override
+  Future<void> updateEnquiryStatus(int id, String status) async {}
+}
+
 void main() {
   group('BrowseCarsPage', () {
     testWidgets('renders cars from repository', (tester) async {
@@ -213,6 +242,13 @@ void main() {
 
   group('ShowroomDetailPage', () {
     testWidgets('renders showroom info and its cars', (tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final showroom = _showroom(3, 'Prime Auto');
       final cars = [_car(10, 3, 'Prime Corolla'), _car(11, 4, 'Other Civic')];
       await tester.pumpWidget(
@@ -232,7 +268,42 @@ void main() {
       expect(find.text('Available Cars'), findsOneWidget);
     });
 
+    testWidgets('showroom detail opens send enquiry sheet', (tester) async {
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final showroom = _showroom(3, 'Prime Auto');
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          home: ShowroomDetailPage(
+            showroom: showroom,
+            carRepository: _FakeCustomerCarRepository(const []),
+            enquiryRepository: _FakeCustomerEnquiryRepository(),
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.ensureVisible(find.text('Send Enquiry'));
+      await tester.tap(find.text('Send Enquiry'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your Name *'), findsOneWidget);
+    });
+
     testWidgets('shows empty state for showroom without cars', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final showroom = _showroom(3, 'Prime Auto');
       await tester.pumpWidget(
         MaterialApp(
@@ -252,6 +323,13 @@ void main() {
     });
 
     testWidgets('tapping a car opens car detail', (tester) async {
+      tester.view.physicalSize = const Size(800, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
       final showroom = _showroom(3, 'Prime Auto');
       final cars = [_car(10, 3, 'Prime Corolla')];
       await tester.pumpWidget(
@@ -264,15 +342,6 @@ void main() {
         ),
       );
       await tester.pump(const Duration(milliseconds: 100));
-
-      await tester.ensureVisible(find.text('Prime Corolla'));
-      await tester.pump();
-      await tester.scrollUntilVisible(
-        find.text('Prime Corolla'),
-        200,
-        scrollable: find.byType(Scrollable).first,
-      );
-      await tester.pump();
 
       await tester.tap(find.text('Prime Corolla'));
       await tester.pump();
@@ -326,6 +395,100 @@ void main() {
 
       expect(find.text('—'), findsNWidgets(5));
       expect(find.text('Price on request'), findsOneWidget);
+    });
+
+    testWidgets('car detail submits a customer enquiry', (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final showroom = _showroom(3, 'Prime Auto');
+      final car = _car(10, 3, 'Prime Corolla');
+      final enquiryRepo = _FakeCustomerEnquiryRepository();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          home: CarDetailPage(
+            car: car,
+            showroomRepository: _FakeShowroomRepository([showroom]),
+            enquiryRepository: enquiryRepo,
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.ensureVisible(find.text('Send Enquiry'));
+      await tester.tap(find.text('Send Enquiry'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Your Name *'), findsOneWidget);
+      expect(find.text('Phone Number *'), findsOneWidget);
+      expect(find.text('Message *'), findsOneWidget);
+
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Your Name *'),
+        'Ali',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Phone Number *'),
+        '0300-1234567',
+      );
+      await tester.enterText(
+        find.widgetWithText(TextFormField, 'Message *'),
+        'Price kitni hai?',
+      );
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Send Enquiry'));
+      await tester.pumpAndSettle();
+
+      expect(enquiryRepo.submitted, [
+        'Ali|0300-1234567|Price kitni hai?|10|3|Prime Corolla|Prime Auto',
+      ]);
+
+      await tester.pump(const Duration(seconds: 5));
+      await tester.pump(const Duration(milliseconds: 300));
+    });
+
+    testWidgets('car detail enquiry sheet validates empty fields', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final showroom = _showroom(3, 'Prime Auto');
+      final car = _car(10, 3, 'Prime Corolla');
+      final enquiryRepo = _FakeCustomerEnquiryRepository();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.dark,
+          home: CarDetailPage(
+            car: car,
+            showroomRepository: _FakeShowroomRepository([showroom]),
+            enquiryRepository: enquiryRepo,
+          ),
+        ),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+
+      await tester.ensureVisible(find.text('Send Enquiry'));
+      await tester.tap(find.text('Send Enquiry'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(ElevatedButton, 'Send Enquiry'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Name is required'), findsOneWidget);
+      expect(find.text('Phone number is required'), findsOneWidget);
+      expect(find.text('Message is required'), findsOneWidget);
+      expect(enquiryRepo.submitted, isEmpty);
     });
   });
 

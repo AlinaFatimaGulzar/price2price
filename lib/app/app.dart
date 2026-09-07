@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../features/auth/data/session_repository.dart';
 import '../features/auth/presentation/auth_landing_page.dart';
-import '../features/home/presentation/home_page.dart';
+import '../features/customer/presentation/customer_shell.dart';
 import '../features/admin/presentation/admin_mode_gateway_page.dart';
 import '../features/admin/presentation/admin_login_page.dart';
 import '../features/splash/presentation/splash_page.dart';
@@ -60,48 +60,48 @@ class _SessionAwareSplash extends StatefulWidget {
 }
 
 class _SessionAwareSplashState extends State<_SessionAwareSplash> {
-  late Future<void> _initFuture;
+  late Future<bool> _ready;
 
   @override
   void initState() {
     super.initState();
-    _initFuture = _checkSession();
+    _ready = _resolveSession();
   }
 
-  Future<void> _checkSession() async {
+  /// Waits for the local session (if any) to finish restoring, then reports
+  /// whether a signed-in user exists. Falls back to the auth stream so a
+  /// slightly late restore still lands the user straight on the home page.
+  Future<bool> _resolveSession() async {
     await Future.delayed(const Duration(milliseconds: 1800));
+    final current = await widget.sessionRepository.getCurrentUser();
+    if (current != null) return true;
+    try {
+      final restored = await widget.sessionRepository
+          .authStateChanges()
+          .timeout(const Duration(seconds: 6))
+          .first;
+      return restored != null;
+    } catch (_) {
+      return false;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<void>(
-      future: _initFuture,
+    return FutureBuilder<bool>(
+      future: _ready,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return SplashPage(nextPage: _buildNextPage());
+          return SplashPage(
+            nextPage: const ColoredBox(color: AppColors.paper),
+          );
         }
-        return _buildNextPage();
+        return SplashPage(
+          nextPage: (snapshot.data ?? false)
+              ? const CustomerShell()
+              : const AuthLandingPage(),
+        );
       },
     );
-  }
-
-  Widget _buildNextPage() {
-    return FutureBuilder<bool>(
-      future: _isUserLoggedIn(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SplashPage(nextPage: const ColoredBox(color: AppColors.paper));
-        }
-        if (snapshot.data == true) {
-          return const HomePage();
-        }
-        return const AuthLandingPage();
-      },
-    );
-  }
-
-  Future<bool> _isUserLoggedIn() async {
-    final user = await widget.sessionRepository.getCurrentUser();
-    return user != null;
   }
 }

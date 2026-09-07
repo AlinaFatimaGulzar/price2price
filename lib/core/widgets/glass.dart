@@ -2,6 +2,32 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme/app_theme.dart';
 
+/// A liquid-glass dialog shell used for confirmations and alerts.
+class LiquidDialog extends StatelessWidget {
+  const LiquidDialog({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.fromLTRB(24, 24, 24, 14),
+  });
+
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+      child: Container(
+        decoration: AppGlass.liquid(),
+        padding: padding,
+        child: child,
+      ),
+    );
+  }
+}
+
 /// A simple dark glass card with a hairline border and soft elevation.
 class GlassCard extends StatelessWidget {
   const GlassCard({

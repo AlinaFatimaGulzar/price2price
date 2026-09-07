@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 /// Premium dark automotive palette.
 ///
-/// Deep midnight navy surfaces, smoked glass, warm off-white text and a
-/// champagne-gold accent used deliberately for CTAs, prices and active states.
+/// Deep midnight navy surfaces, smoked liquid glass, warm off-white text and a
+/// glossy race-red accent used deliberately for CTAs, prices and active states.
 abstract final class AppColors {
   /// Primary text — warm off-white.
   static const ink = Color(0xFFF3F5F6);
@@ -20,17 +20,23 @@ abstract final class AppColors {
   /// Base glass card surface.
   static const surface = Color(0xFF12242C);
 
-  /// Champagne-gold primary accent.
-  static const accent = Color(0xFFD8A955);
+  /// Glossy race-red primary accent (full-shine red).
+  static const accent = Color(0xFFE5303B);
 
-  /// Deep gold — gradients, muted highlights, destructive/muted states.
-  static const accentDark = Color(0xFF9C7429);
+  /// Deep crimson — gradients, muted highlights, destructive/muted states.
+  static const accentDark = Color(0xFFA01420);
 
-  /// Dark text placed on the gold accent (readable contrast).
-  static const onAccent = Color(0xFF0B171D);
+  /// Dark text placed on the red accent (readable contrast).
+  static const onAccent = Color(0xFF1A070A);
 
   /// Hairline border for glass surfaces — white at ~13%.
   static const border = Color(0x21FFFFFF);
+
+  /// Soft coral used for reject / warning / destructive states.
+  static const warning = Color(0xFFFF7A55);
+
+  /// Muted mint used for approved / positive states.
+  static const success = Color(0xFF6FD3A4);
 
   /// Soft error red that stays readable on midnight backgrounds.
   static const danger = Color(0xFFFF8A80);
@@ -51,9 +57,9 @@ abstract final class AppShadows {
     offset: Offset(0, 12),
   );
 
-  /// Warm gold glow reserved for the primary CTA and featured hero.
-  static const gold = BoxShadow(
-    color: Color(0x47D8A955),
+  /// Red glow reserved for the primary CTA and featured hero.
+  static const accentGlow = BoxShadow(
+    color: Color(0x59E5303B),
     blurRadius: 26,
     offset: Offset(0, 10),
   );
@@ -84,6 +90,31 @@ abstract final class AppGlass {
       color: const Color(0x0FFFFFFF),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: borderColor ?? AppColors.border),
+    );
+  }
+
+  /// Liquid-glass surface for popups — translucent red-tinted frosted depth
+  /// with a glossy top sheen and hairline highlight.
+  static BoxDecoration liquid({
+    double radius = 26,
+    Color? borderColor,
+    List<BoxShadow>? shadows,
+  }) {
+    return BoxDecoration(
+      gradient: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Color(0x8CE5303B),
+          Color(0x59FFFFFF),
+          Color(0xB30F2027),
+          Color(0xF2071116),
+        ],
+        stops: [0, 0.06, 0.5, 1],
+      ),
+      borderRadius: BorderRadius.circular(radius),
+      border: Border.all(color: borderColor ?? AppColors.border),
+      boxShadow: shadows ?? const [AppShadows.accentGlow],
     );
   }
 }
@@ -269,16 +300,44 @@ abstract final class AppTheme {
           borderRadius: BorderRadius.circular(AppRadius.sm + 2),
         ),
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.transparent,
+        surfaceTintColor: Colors.transparent,
+        indicatorColor: AppColors.accent.withValues(alpha: 0.18),
+        height: 66,
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: AppColors.accent);
+          }
+          return const IconThemeData(color: AppColors.mutedInk);
+        }),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const TextStyle(
+              color: AppColors.accent,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            );
+          }
+          return const TextStyle(
+            color: AppColors.mutedInk,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          );
+        }),
+      ),
       snackBarTheme: SnackBarThemeData(
-        backgroundColor: const Color(0xFF0F2027),
+        backgroundColor: const Color(0xF21A2B32),
         behavior: SnackBarBehavior.floating,
         contentTextStyle: const TextStyle(color: AppColors.ink, fontSize: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
+          side: const BorderSide(color: AppColors.border),
         ),
+        elevation: 6,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: const Color(0xFF0F2027),
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -296,7 +355,7 @@ abstract final class AppTheme {
         ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
-        backgroundColor: Color(0xFF0E1D24),
+        backgroundColor: Colors.transparent,
         surfaceTintColor: Colors.transparent,
         showDragHandle: false,
         shape: RoundedRectangleBorder(

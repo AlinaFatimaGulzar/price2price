@@ -29,7 +29,6 @@ void main() {
 
       expect(find.text('Find your next\ncar in Gujranwala.'), findsOneWidget);
       expect(find.text('Browse cars'), findsOneWidget);
-      expect(find.byIcon(Icons.logout), findsOneWidget);
       expect(find.byIcon(Icons.search), findsOneWidget);
     });
   });

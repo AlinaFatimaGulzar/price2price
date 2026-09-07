@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/theme/app_theme.dart';
+import '../../../core/widgets/glass.dart';
+import '../../admin/data/supabase_admin_auth_repository.dart';
+import '../../admin/domain/admin_auth_repository.dart';
 import '../../auth/data/session_repository.dart';
 import '../../auth/data/supabase_auth_repository.dart';
 import '../../auth/presentation/auth_landing_page.dart';
@@ -33,9 +36,11 @@ class _ProfilePageState extends State<ProfilePage> {
       widget.reviewRepository ?? const SupabaseReviewRepository();
   late final SessionRepository _sessionRepository =
       widget.sessionRepository ?? const SupabaseSessionRepository();
+  final AdminAuthRepository _adminAuth = const SupabaseAdminAuthRepository();
 
   UserProfile? _profile;
   List<ShowroomReview> _myReviews = const [];
+  bool? _isAdmin;
   bool _loading = true;
   bool _loggingOut = false;
 
@@ -46,14 +51,17 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _load() async {
+    final adminFuture = _adminAuth.isCurrentUserAdmin().catchError((_) => false);
     final results = await Future.wait([
       _profileRepository.getProfile(),
       _reviewRepository.getMyReviews(),
     ]);
+    final isAdmin = await adminFuture;
     if (!mounted) return;
     setState(() {
       _profile = results[0] as UserProfile?;
       _myReviews = results[1] as List<ShowroomReview>;
+      _isAdmin = isAdmin;
       _loading = false;
     });
   }
@@ -61,21 +69,41 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<void> _confirmLogout() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text(
-          'You can sign back in whenever you like — your session stays saved.',
+      builder: (context) => LiquidDialog(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Log out?',
+              style: TextStyle(
+                color: AppColors.ink,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'You can sign back in whenever you like — your session stays saved.',
+              style: TextStyle(color: AppColors.mutedInk, height: 1.5),
+            ),
+            SizedBox(height: 22),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  child: const Text('Log out'),
+                ),
+              ],
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Log out'),
-          ),
-        ],
       ),
     );
     if (confirmed != true || !mounted) return;
@@ -104,44 +132,63 @@ class _ProfilePageState extends State<ProfilePage> {
     final pending = _myReviews.length - approved;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Account'), elevation: 0),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(20),
-              children: [
-                _ProfileHeader(profile: _profile),
-                const SizedBox(height: 18),
-                _StatsTile(approved: approved, pending: pending),
-                const SizedBox(height: 26),
-                Text(
-                  'Settings',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _MenuTile(
-                  icon: Icons.lock_reset,
-                  title: 'Change password',
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const ResetPasswordPage(
-                        repository: SupabaseAuthRepository(),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _MenuTile(
-                  icon: Icons.login,
-                  title: _loggingOut ? 'Logging out…' : 'Log out',
-                  destructive: true,
-                  enabled: !_loggingOut,
-                  onTap: _confirmLogout,
-                ),
-              ],
+      body: SafeArea(
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+          padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+          children: [
+            Text(
+              'My Account',
+              style: Theme.of(context).textTheme.displaySmall,
             ),
+            const SizedBox(height: 6),
+            Text(
+              'Manage your profile and reviews',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 20),
+            _ProfileHeader(profile: _profile),
+            const SizedBox(height: 18),
+            _StatsTile(approved: approved, pending: pending),
+            const SizedBox(height: 26),
+            Text(
+              'Settings',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 10),
+            _MenuTile(
+              icon: Icons.lock_reset,
+              title: 'Change password',
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => const ResetPasswordPage(
+                    repository: SupabaseAuthRepository(),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            if (_isAdmin == true) ...[
+              _MenuTile(
+                icon: Icons.admin_panel_settings,
+                title: 'Admin Mode',
+                onTap: () => Navigator.of(context).pushNamed('/admin-mode'),
+              ),
+              const SizedBox(height: 10),
+            ],
+            _MenuTile(
+              icon: Icons.login,
+              title: _loggingOut ? 'Logging out…' : 'Log out',
+              destructive: true,
+              enabled: !_loggingOut,
+              onTap: _confirmLogout,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

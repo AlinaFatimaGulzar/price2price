@@ -85,10 +85,7 @@ class _BrowseCarsPageState extends State<BrowseCarsPage> {
     final applied = await showModalBottomSheet<_FiltersResult>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.paper,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
-      ),
+      backgroundColor: Colors.transparent,
       builder: (context) => _FiltersSheet(
         initialFuel: _fuel,
         initialTransmission: _transmission,
@@ -316,9 +313,10 @@ class _FiltersSheetState extends State<_FiltersSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+    return Container(
+      decoration: AppGlass.liquid(radius: 24),
+      padding: const EdgeInsets.fromLTRB(24, 18, 24, 16),
+      child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
